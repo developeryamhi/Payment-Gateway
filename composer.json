@@ -1,0 +1,29 @@
+{
+    "name": "developeryamhi/payment-gateway",
+    "description": "Easier Payment Gateway Integration Library",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Biraj Pandey",
+            "email": "developeryamhi@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "evenement/evenement": "1.0.*",
+        "j4mie/paris": "dev-master",
+        "paypal/rest-api-sdk-php" : "0.5.*",
+        "braintree/braintree_php" : "2.27.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Developeryamhi\\PaymentGateway\\": "src/"
+        },
+        "classmap": [
+            "web/lib/"
+        ]
+    }
+}
