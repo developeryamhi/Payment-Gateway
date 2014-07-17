@@ -1,6 +1,108 @@
 <?php
 
 //  Check Function Exists
+if(!function_exists('pds_gateway_support')) {
+
+    //  Add the Gateway Source
+    function pds_gateway_support($key, $class, $namespace = '\\Developeryamhi\\PaymentGateway\\Gateway\\') {
+
+        //  Get the Lists
+        global $pds_gateways;
+        if(!$pds_gateways)  $pds_gateways = array();
+
+        //  Class Resolved
+        $full_classname = $namespace . $class;
+
+        //  Check if Implements
+        if(in_array('Developeryamhi\PaymentGateway\Interfaces\PaymentGatewayInterface', class_implements($full_classname))
+                && in_array('Developeryamhi\PaymentGateway\PaymentGateway', class_parents($full_classname))) {
+
+            //  Add to the List
+            if(!isset($pds_gateways[$key]))
+                $pds_gateways[$key] = $full_classname;
+        }
+    }
+}
+
+//  Check Function Exists
+if(!function_exists('pds_gateway_unsupport')) {
+
+    //  Remove the Gateway Source
+    function pds_gateway_unsupport($key) {
+
+        //  Get the Lists
+        global $pds_gateways;
+        if(!$pds_gateways)  $pds_gateways = array();
+
+        //  Add to the List
+        if(isset($pds_gateways[$key]))
+            unset($pds_gateways[$key]);
+    }
+}
+
+//  Check Function Exists
+if(!function_exists('pds_gateway_exists')) {
+
+    //  Remove the Gateway Source
+    function pds_gateway_exists($key) {
+
+        //  Get the Lists
+        global $pds_gateways;
+        if(!$pds_gateways)  $pds_gateways = array();
+
+        //  Return
+        return (isset($pds_gateways[$key]));
+    }
+}
+
+//  Check Function Exists
+if(!function_exists('pds_gateway_get')) {
+
+    //  Get the Gateway Source
+    function pds_gateway_get($key) {
+
+        //  Get the Lists
+        global $pds_gateways;
+        if(!$pds_gateways)  $pds_gateways = array();
+
+        //  Return
+        if(isset($pds_gateways[$key]))
+            return $pds_gateways[$key];
+        return null;
+    }
+}
+
+//  Check Function Exists
+if(!function_exists('pds_gateway_lists')) {
+
+    //  Get the Gateway Sources
+    function pds_gateway_lists() {
+
+        //  Get the Lists
+        global $pds_gateways;
+        if(!$pds_gateways)  $pds_gateways = array();
+
+        //  Lists
+        $lists = array();
+
+        //  Loop Each
+        foreach($pds_gateways as $gateway_key => $gateway_class) {
+
+            //  Check Class Exists
+            if(class_exists($gateway_class)) {
+
+                //  Set
+                $lists[$gateway_key] = $gateway_class::$label;
+            }
+        }
+
+        //  Return
+        return $lists;
+    }
+}
+
+
+//  Check Function Exists
 if(!function_exists('pds_add_filter')) {
 
     //  Add Filter

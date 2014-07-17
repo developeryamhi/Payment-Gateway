@@ -3,7 +3,7 @@
 class CardHelper {
 
     //  Get Card Type
-    public static function getCardType($number) {
+    public static function getType($number) {
 
         //  Patterns
         $cards = array(
@@ -31,14 +31,14 @@ class CardHelper {
     }
 
     //  Match Card Type
-    public static function cardTypeIs($number, $type) {
+    public static function isType($number, $type) {
 
         //  Match
-        return (self::getCardType($number) == $type);
+        return (self::getType($number) == $type);
     }
 
     //  Get Card Type Label
-    public static function cardTypeLabel($type) {
+    public static function typeLabel($type) {
         $labels = array(
             'visa' => 'Visa',
             'amex' => 'American Express',
@@ -54,7 +54,7 @@ class CardHelper {
     }
 
     //  Validate Credit Card Number
-    public static function isValidCardNumber($number) {
+    public static function isValid($number) {
 
         // Strip any non-digits (useful for credit card numbers with spaces and hyphens)
         $number = preg_replace('/\D/', '', $number);

@@ -9,15 +9,15 @@ use PayPal\Api\Transaction;
 use PayPal\Rest\ApiContext;
 use PayPal\Auth\OAuthTokenCredential;
 
-class PaypalGateway extends PaymentGateway {
+class PaypalGateway extends \Developeryamhi\PaymentGateway\PaymentGateway {
 
-    //  Set Gateway Key, Name
-    public $key = 'paypal';
-    public $name = 'Paypal';
+    //  Set Gateway Name, Label
+    public static $name = 'paypal';
+    public static $label = 'Paypal';
 
 
     //  Process Transaction
-    public function _runTransaction(Closure $closure = null) {
+    public function _runTransaction(\Closure $closure = null) {
 
         //  Set No Time Limit
         set_time_limit(0);
@@ -31,7 +31,7 @@ class PaypalGateway extends PaymentGateway {
         //  Create Card
         $card = new CreditCard();
         $card->setNumber($cardInfo['number']);
-        $card->setType(getCardType($cardInfo['number']));
+        $card->setType(\Developeryamhi\PaymentGateway\CardHelper::getType($cardInfo['number']));
         $card->setExpire_month($cardInfo['exp_month']);
         $card->setExpire_year($cardInfo['exp_year_full']);
         if($cardInfo['cvc'])    $card->setCvv2($cardInfo['cvc']);

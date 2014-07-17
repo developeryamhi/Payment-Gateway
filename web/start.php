@@ -16,7 +16,7 @@ set_exception_handler(function(Exception $ex) {
 });
 
 //  Listen Paypal Gateway Create
-Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.paypal', function (PaypalGateway $paypal) {
+Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.paypal', function (\Developeryamhi\PaymentGateway\Gateway\PaypalGateway $paypal) {
 
     //  Set Transaction Environment
     $paypal->setEnvironment(PP_TRANSACTION_MODE);
@@ -29,7 +29,7 @@ Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.paypal', 
 });
 
 //  Listen BrainTree Gateway Create
-Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.braintree', function (BrainTreeGateway $brainTree) {
+Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.braintree', function (\Developeryamhi\PaymentGateway\Gateway\BrainTreeGateway $brainTree) {
 
     //  Set Transaction Environment
     $brainTree->setEnvironment(BT_TRANSACTION_MODE);
@@ -43,14 +43,14 @@ Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.created.braintree
 });
 
 //  Listen Transaction Start
-Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.transaction.start', function (PaymentGateway $gateway) {
+Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.transaction.start', function (\Developeryamhi\PaymentGateway\PaymentGateway $gateway) {
 
     //  Insert Transaction Row to Table
     getDBConn()->transaction()->insert_update(array(
         'amount' => $gateway->getAmount(),
         'description' => $gateway->getTransactionDetail(),
         'currency' => $gateway->getCurrency(),
-        'gateway' => $gateway->key,
+        'gateway' => $gateway->getName(),
         'environment' => $gateway->getEnvironment()
     ), array());
 
@@ -62,7 +62,7 @@ Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.transaction.start
 });
 
 //  Listen Transaction End
-Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.transaction.end', function (PaymentGateway $gateway) {
+Developeryamhi\PaymentGateway\GatewayHelper::event_on('gateway.transaction.end', function (\Developeryamhi\PaymentGateway\PaymentGateway $gateway) {
 
     //  Row ID
     $rowid = $gateway->getProperty('db_id');

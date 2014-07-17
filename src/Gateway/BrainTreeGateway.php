@@ -1,20 +1,20 @@
 <?php namespace Developeryamhi\PaymentGateway\Gateway;
 
-class BrainTreeGateway extends PaymentGateway {
+class BrainTreeGateway extends \Developeryamhi\PaymentGateway\PaymentGateway {
 
-    //  Set Gateway Key, Name
-    public $key = 'braintree';
-    public $name = 'BrainTree';
+    //  Set Gateway Name, Label
+    public static $name = 'braintree';
+    public static $label = 'BrainTree';
 
 
     //  Run Transaction
-    public function _runTransaction(Closure $closure = null) {
+    public function _runTransaction(\Closure $closure = null) {
 
         //  Set Properties
-        Braintree_Configuration::environment($this->getEnvironment());
-        Braintree_Configuration::merchantId($this->getMerchantInfoVal('merchant_id'));
-        Braintree_Configuration::publicKey($this->getMerchantInfoVal('public_key'));
-        Braintree_Configuration::privateKey($this->getMerchantInfoVal('private_key'));
+        \Braintree_Configuration::environment($this->getEnvironment());
+        \Braintree_Configuration::merchantId($this->getMerchantInfoVal('merchant_id'));
+        \Braintree_Configuration::publicKey($this->getMerchantInfoVal('public_key'));
+        \Braintree_Configuration::privateKey($this->getMerchantInfoVal('private_key'));
 
         //  Get Card Info
         $cardInfo = $this->getCardInfo();
@@ -27,7 +27,7 @@ class BrainTreeGateway extends PaymentGateway {
         try {
 
             //  Make Sale
-            $result = Braintree_Transaction::sale(array(
+            $result = \Braintree_Transaction::sale(array(
                 'amount' => $this->getAmount(),
                 'creditCard' => array(
                     'number' => $cardInfo['number'],

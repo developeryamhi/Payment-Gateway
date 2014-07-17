@@ -14,6 +14,10 @@ class GatewayHelper {
         //  Create Event Emitter Instance
         if(!$event_emitter)
             $event_emitter = new \Evenement\EventEmitter();
+
+        //  Add the Default Gateways
+        pds_gateway_support(Gateway\PaypalGateway::$name, 'PaypalGateway');
+        pds_gateway_support(Gateway\BrainTreeGateway::$name, 'BrainTreeGateway');
     }
 
     //  Get the Event Object
@@ -48,21 +52,21 @@ class GatewayHelper {
     }
 
     //  Create the Instance
-    public static function locateGateway($gateway, $append = 'Gateway', $prepend = '') {
+    public static function locateGateway($gateway) {
 
         //  Create the Gateway Class Name
-        $gatewayClass = $prepend . $gateway . $append;
+        $gatewayClass = pds_gateway_get($gateway);
 
         //  Check Class Exists
         if (!class_exists($gatewayClass))
-            throw new Exception("Payment Gateway '{$gateway}' does not exist.");
+            throw new \Exception("{$gatewayClass}: Payment Gateway '{$gateway}' does not exist.");
 
         //  Create the Gateway Class Instance
         $instance = new $gatewayClass();
 
         //  Check for Proper Class Defination
         if (!$instance instanceof PaymentGateway)
-            throw new Exception("Payment Gateway '{$gateway}' must extend class 'PaymentGateway'.");
+            throw new \Exception("Payment Gateway '{$gateway}' must extend class 'PaymentGateway'.");
 
         //  Return the Instance
         return $instance;

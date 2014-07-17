@@ -25,6 +25,20 @@ class Property extends \stdClass {
         return (isset($this->{$key}));
     }
 
+    //  Read Value
+    public function read($key, $default = null) {
+
+        //  Check Exists
+        if($this->exists($key)) {
+
+            //  Return
+            return $this->{$key};
+        }
+
+        //  Return Default
+        return $default;
+    }
+
     //  Reset
     public function reset() {
 
@@ -60,8 +74,14 @@ class Property extends \stdClass {
     //  Copy XML
     public function copyXML($xml, $clear = true) {
 
+        //  Check Valid
+        if(!$xml instanceof \SimpleXMLElement && !is_string($xml))  return;
+
+        //  Check for String
+        if(is_string($xml)) $xml = simplexml_load_string($xml);
+
         //  Port to Array Copier
-        $this->copyArray(self::object_to_array($obj), $clear);
+        $this->copyArray(self::object_to_array($xml), $clear);
     }
 
     //  To Array
@@ -107,7 +127,7 @@ class Property extends \stdClass {
     }
 
     //  Create XML Nodes
-    public function _toXML($obj, $level = 1) {
+    public function _toXML($obj = null, $level = 1) {
 
         //  Check Object
         if(!$obj)   $obj = $this;
@@ -128,7 +148,7 @@ class Property extends \stdClass {
             } else {
 
                 //  Append
-                $output .= str_repeat("\t", $level) . "<{$key}>" . (is_numeric($val) ? $val : (string)$val) . "</{$key}>" . PHP_EOL;
+                $output .= str_repeat("\t", $level) . "<{$key}>" . (is_numeric((string)$val) ? $val : (string)$val) . "</{$key}>" . PHP_EOL;
             }
         }
 
@@ -136,12 +156,33 @@ class Property extends \stdClass {
         return $output;
     }
 
+    //  To Query String
+    public function toQueryString() {
+
+        //  Get Array
+        $arr = $this->toArray();
+
+        //  Return
+        return http_build_query($arr);
+    }
+
+    //  To String
+    public function __toString() {
+        return '#' . __CLASS__;
+    }
+
     //  Convert Object to Array
     public static function object_to_array($obj) {
         $arr = array();
         if($obj) {
             foreach($obj as $key => $val) {
-                if(is_object($val) || is_array($val)) {
+                if($val instanceof \SimpleXMLElement) {
+                    if(sizeof($val) > 0)
+                        $arr[$key] = self::object_to_array($val);
+                    else
+                        $arr[$key] = (is_numeric((string)$val) ? (float)$val : (string)$val);
+                }
+                else if(is_object($val) || is_array($val)) {
                     $arr[$key] = self::object_to_array($val);
                 } else {
                     $arr[$key] = $val;

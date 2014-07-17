@@ -1,22 +1,13 @@
 <?php namespace Developeryamhi\PaymentGateway;
 
-abstract class PaymentGateway implements PaymentGatewayInterface {
+abstract class PaymentGateway implements Interfaces\PaymentGatewayInterface {
 
-    //  Gateway Key, Name
-    public $key;
-    public $name;
 
     //  Transaction Environment
     protected $environment;
 
-    //  Merchant Info
-    protected $merchantInfo = array();
-
-    //  Properties Holder
-    protected $properties = array();
-
-    //  Post Fields
-    protected $post_fields = array();
+    //  Gateway Settings
+    protected $settings = null;
 
     //  Transaction ID
     protected $transID = null;
@@ -37,19 +28,61 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     //  Construct
     public function __construct() {
 
+        //  Create Settings Collection
+        $this->settings = new Object\PropertyCollection();
+
+        //  Create Items
+        $this->settings->addItem('merchant', new Object\Property());
+        $this->settings->addItem('properties', new Object\Property());
+        $this->settings->addItem('post_fields', new Object\Property());
+
+        //  Call Init
+        $this->_init();
+
         //  Fire Event
         $this->_fireEvent('created');
+    }
+
+    //  Get Name
+    public function getName() {
+
+        //  Get Class
+        $class = '\\' . get_class($this);
+
+        //  Return
+        return $class::$name;
+    }
+
+    //  Get Label
+    public function getLabel() {
+
+        //  Get Class
+        $class = '\\' . get_class($this);
+
+        //  Return
+        return $class::$label;
+    }
+
+    //  Init Function
+    public function _init() {
+        //  Do Nothing Here
+    }
+
+    //  Settings Manipulator
+    public function settings() {
+
+        //  Return Settings Collection
+        return $this->settings;
     }
 
     //  Fire External Event
     protected function _fireEvent($event) {
 
         //  Emit Gateway Object Created Event
-        event()->emit('gateway.' . $event, array($this));
+        GatewayHelper::event_fire('gateway.' . $event, array($this));
 
         //  Check for Key and Emit Event
-        if($this->key != '')
-            event()->emit('gateway.' . $event . '.' . $this->key, array($this));
+        GatewayHelper::event_fire('gateway.' . $event . '.' . $this->getName(), array($this));
     }
 
     //  Fire Internal Event
@@ -64,98 +97,76 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     public function setCurrency($cur) {
 
         //  Set Property
-        $this->setProperty('currency', $cur);
+        $this->settings()->properties_assign('currency', $cur);
     }
 
     //  Get Currency
     public function getCurrency() {
-        return $this->getProperty('currency');
+        return $this->settings()->properties_read('currency');
     }
 
     //  Set Transaction Description
     public function setTransactionDetail($details) {
 
         //  Store Details
-        $this->setProperty('trans_details', $details);
+        $this->settings()->properties_assign('trans_details', $details);
     }
 
     //  Get Transaction Description
     public function getTransactionDetail() {
-        return $this->getProperty('trans_details');
+        return $this->settings()->properties_read('trans_details');
     }
 
     //  Set Property
     public function setProperty($key, $value) {
 
         //  Store
-        $this->properties[$key] = $value;
+        $this->settings()->properties_assign($key, $value);
     }
 
     //  Get Property
     public function getProperty($key, $def = null) {
 
-        //  Check for Property
-        if($this->hasProperty($key)) {
-
-            //  Return
-            return $this->properties[$key];
-        }
-
-        //  Return Default
-        return $def;
+        //  Read Property
+        return $this->settings()->properties_read($key, $def);
     }
 
     //  Check Property Exists
     public function hasProperty($key) {
-        return (isset($this->properties[$key]));
+        return ($this->settings()->properties_exists($key));
     }
 
     //  Remove Property
     public function removeProperty($key) {
 
-        //  Check for Property
-        if($this->hasProperty($key)) {
-
-            //  Unset
-            unset($this->properties[$key]);
-        }
+        //  Remove Property
+        $this->settings()->properties_unassign($key);
     }
 
     //  Set Post Field
     public function setPostField($key, $value) {
 
         //  Store
-        $this->post_fields[$key] = $value;
+        $this->settings()->post_fields_assign($key, $value);
     }
 
     //  Get Post Field
     public function getPostField($key, $def = null) {
 
-        //  Check for Post Field
-        if($this->hasPostField($key)) {
-
-            //  Return
-            return $this->post_fields[$key];
-        }
-
-        //  Return Default
-        return $def;
+        //  Read Post Field
+        return $this->settings()->post_fields_read($key, $def);
     }
 
     //  Check Post Field Exists
     public function hasPostField($key) {
-        return (isset($this->post_fields[$key]));
+        return ($this->settings()->post_fields_exists($key));
     }
 
     //  Remove Post Field
     public function removePostField($key) {
 
-        //  Check for Post Field
-        if($this->hasPostField($key)) {
-
-            //  Unset
-            unset($this->post_fields[$key]);
-        }
+        //  Remove Post Field
+        $this->settings()->post_fields_unassign($key);
     }
 
     //  Get Amount
@@ -170,21 +181,14 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
 
     //  Get Merchant Info
     public function getMerchantInfo() {
-        return $this->merchantInfo;
+        return $this->settings()->getItem('merchant');
     }
 
     //  Get Merchant Info Value
     public function getMerchantInfoVal($key, $def = null) {
 
-        //  Check
-        if(isset($this->merchantInfo[$key])) {
-
-            //  Return
-            return $this->merchantInfo[$key];
-        }
-
-        //  Return Def
-        return $def;
+        //  Get Info
+        return $this->settings()->merchant_read($key, $def);
     }
 
     //  Get Card Info
@@ -241,7 +245,7 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     public function setMerchantInfo($info) {
 
         //  Store
-        $this->merchantInfo = $info;
+        $this->settings()->merchant_copyArray($info);
 
         //  Fire External Event
         $this->_fireInternalEvent('onMerchantInfoChanged');
@@ -251,7 +255,7 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     public function setMerchantInfoVal($key, $val) {
 
         //  Set
-        $this->merchantInfo[$key] = $val;
+        $this->settings()->merchant_assign($key, $val);
 
         //  Fire External Event
         $this->_fireInternalEvent('onMerchantInfoChanged');
@@ -268,7 +272,7 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     }
 
     //  Process
-    public function process(Closure $closure = null) {
+    public function process(\Closure $closure = null) {
 
         //  Trigger Start Events
         $this->_fireEvent('transaction.start');
@@ -279,7 +283,7 @@ abstract class PaymentGateway implements PaymentGatewayInterface {
     }
 
     //  Run Transaction
-    public function _runTransaction(Closure $closure = null) {
+    public function _runTransaction(\Closure $closure = null) {
 
         //  Trigger End Events
         $this->_fireEvent('transaction.end');

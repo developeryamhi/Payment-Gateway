@@ -3,24 +3,6 @@
 //  Load Config File
 require_once 'config.php';
 
-$property = new Developeryamhi\PaymentGateway\Object\Property();
-$property->assign('first_name', 'Biraj');
-$property->assign('last_name', 'Pandey');
-$property->assign('location', array(
-    'address' => 'Kirtipur',
-    'city' => 'Kathmandu',
-    'state' => 'Bagmati',
-    'country' => 'Nepal'
-));
-$property->copyArray(array(
-    'currency' => 'NPR'
-), false);
-$property->copyObject((object)array('lat' => 0.2645, 'lng' => 15.6845), false);
-
-$propCollection = new Developeryamhi\PaymentGateway\Object\PropertyCollection();
-$propCollection->addItem('first', $property);
-echo $propCollection->toXML()->asXML();exit;
-
 //  Messages to Display
 $messages = array(
     'no_payment_data' => 'No Payment Info Submitted'
@@ -63,7 +45,7 @@ switch($action) {
             $cc_expiry = str_ireplace(' ', '', $payment_info['cc_exp']);
             $expiry_split = explode('/', $cc_expiry);
             $amount = $payment_info['amount'];
-            $card_type = getCardType($cc_number);
+            $card_type = Developeryamhi\PaymentGateway\CardHelper::getType($cc_number);
 
             //  Check for Auto-Detect Gateway
             if($gatewayName == '- Auto Detect -') {
@@ -84,7 +66,7 @@ switch($action) {
             $success = true;
 
             //  Validate Card Info
-            if(!isValidCardNumber($cc_number)) {
+            if(!Developeryamhi\PaymentGateway\CardHelper::isValid($cc_number)) {
 
                 //  Set Error
                 $success = false;
@@ -128,7 +110,7 @@ switch($action) {
             if($success) {
 
                 //  Create Gateway Object
-                $gateway = getGatewayObject($gatewayName);
+                $gateway = \Developeryamhi\PaymentGateway\GatewayHelper::locateGateway($gatewayName);
 
                 //  Set Transaction Detail
                 $gateway->setTransactionDetail('This is test transaction');
@@ -141,7 +123,7 @@ switch($action) {
                 $gateway->setCardInfo($cc_number, $expiry_split[0], $expiry_split[1]);
 
                 //  Process Transaction
-                $gateway->process(function($success, $result, PaymentGateway $pg) {
+                $gateway->process(function($success, $result, Developeryamhi\PaymentGateway\PaymentGateway $pg) {
 
                     //  Message Key
                     $message_key = 'gateway_response';
@@ -217,9 +199,9 @@ switch($action) {
                                 <div class="form-group">
                                     <label>Payment Gateway</label>
                                     <select name="payment[gateway]" class="form-control">
-                                        <?php $gateways = array('- Auto Detect -', 'Paypal', 'BrainTree'); ?>
-                                        <?php foreach($gateways as $gName) { ?>
-                                        <option value="<?php echo $gName; ?>" <?php echo ($payment_info && $gName == $payment_info['gateway'] ? 'selected="selected"' : ''); ?>><?php echo $gName; ?></option>
+                                        <?php $gateways = pds_gateway_lists(); ?>
+                                        <?php foreach($gateways as $gKey => $gName) { ?>
+                                        <option value="<?php echo $gKey; ?>" <?php echo ($payment_info && $gKey == $payment_info['gateway'] ? 'selected="selected"' : ''); ?>><?php echo $gName; ?></option>
                                         <?php } ?>
                                     </select>
                                 </div>
