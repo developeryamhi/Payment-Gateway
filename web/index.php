@@ -158,7 +158,7 @@ switch($action) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Assignment: Payment Gateway Integration</title>
+<title>Example: Payment Gateway Integration</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
 <link href="assets/css/bootstrap.min.css" rel="stylesheet" />

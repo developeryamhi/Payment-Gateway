@@ -9,6 +9,9 @@ abstract class PaymentGateway implements Interfaces\PaymentGatewayInterface {
     //  Gateway Settings
     protected $settings = null;
 
+    //  Validation Response
+    protected $vResponse = null;
+
     //  Transaction ID
     protected $transID = null;
 
@@ -35,6 +38,9 @@ abstract class PaymentGateway implements Interfaces\PaymentGatewayInterface {
         $this->settings->addItem('merchant', new Object\Property());
         $this->settings->addItem('properties', new Object\Property());
         $this->settings->addItem('post_fields', new Object\Property());
+
+        //  Create Validation Response
+        $this->vResponse = new Object\ValidationResponse();
 
         //  Call Init
         $this->_init();
@@ -273,6 +279,9 @@ abstract class PaymentGateway implements Interfaces\PaymentGatewayInterface {
 
     //  Process
     public function process(\Closure $closure = null) {
+
+        //  Validate Transaction
+        $this->vResponse->validate($this);
 
         //  Trigger Start Events
         $this->_fireEvent('transaction.start');
